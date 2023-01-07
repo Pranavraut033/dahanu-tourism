@@ -1,6 +1,6 @@
 import type { AppProps } from "next/app";
 import "../styles/globals.scss";
-import { createContext, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import cardList from "../constants/card";
 import { useRouter } from "next/router";
 import { CardContext } from "../utils";

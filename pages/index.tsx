@@ -1,75 +1,40 @@
 import Head from "next/head";
 import Header from "../components/Header";
-import { useContext, useMemo, useState } from "react";
+import { lazy, useContext, useMemo, useState } from "react";
 import cardList from "../constants/card";
 import classnames from "classnames";
 import { CardContext, isClient } from "../utils";
 import Card from "../components/Card";
+import AnimateOnChange from "../components/AnimateOnChange";
+import Image from "next/image";
+import StatusHUD from "../components/StatusHUD";
 
-let AnimateOnChange: any = () => <></>;
-let easings: any = {};
-
-if (isClient) {
-  AnimateOnChange = require("react-animation").AnimateOnChange;
-  easings = require("react-animation").easings;
-}
+// const AnimateOnChange = lazy(() => import("../components/AnimateOnChange"));
 
 export default function Home() {
   const [eye, setEye] = useState(false);
-  const { current } = useContext(CardContext);
+  const { current, currentIndex } = useContext(CardContext);
 
   const cover = useMemo(
     () => (
-      <>
-        <div
-          suppressHydrationWarning={true}
+      <div className="fixed -inset-[4px]">
+        <Image
+          loading="eager"
+          src={current.cover}
+          alt={current.title}
           style={{
-            backgroundImage: `url(${current.cover.src})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: eye ? undefined : "blur(8px) brightness(50%)",
+            objectFit: "cover",
+            objectPosition: "center",
+            filter: eye ? undefined : "blur(2px) brightness(50%)",
           }}
-          className="fixed -inset-[4px] z-[0] transition"
+          sizes="100vw"
+          className={classnames(
+            "h-full w-full transition-all z-[2] duration-500"
+          )}
         />
-        {isClient ? (
-          <AnimateOnChange
-            durationIn="200ms"
-            durationOut="200ms"
-            easingsIn="easeInQuad"
-            easingsOut="easeInQuad"
-            animationIn="fadeIn"
-            animationOut="fadeOut"
-            className={classnames(
-              eye ? "!opacity-0" : "",
-              "transition-opacity"
-            )}
-          >
-            <div
-              suppressHydrationWarning={true}
-              style={{
-                backgroundImage: `url(${current.cover.src})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                filter: "blur(2px) brightness(70%)",
-              }}
-              className="fixed -inset-[4px] z-[1] transition"
-            ></div>
-          </AnimateOnChange>
-        ) : (
-          <div
-            suppressHydrationWarning={true}
-            style={{
-              backgroundImage: `url(${current.cover.src})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "blur(2px) brightness(70%)",
-            }}
-            className="fixed -inset-[4px] z-[1] transition"
-          />
-        )}
-      </>
+      </div>
     ),
-    [current.cover.src, eye]
+    [current.cover, current.title, eye]
   );
 
   return (
@@ -86,7 +51,8 @@ export default function Home() {
       >
         <Header />
       </div>
-      <main className="overflow-hidden h-[calc(100vh-112px)]">
+      <main className="overflow-hidden h-[calc(100vh-112px)] pb-12 pl-32">
+        <StatusHUD />
         {cover}
         <button
           type="button"
@@ -102,61 +68,52 @@ export default function Home() {
         <div
           className={classnames(
             eye ? "opacity-0" : "opacity-100",
-            "transition-opacity h-full pb-20 flex items-center space-x-14 relative z-[1] px-[42px]"
+            "transition-opacity h-full pb-20 flex items-center space-x-14 relative z-[1] pl-[42px]"
           )}
         >
-          <div className=""></div>
-          <div className="max-w-[42vw] pr-20">
+          <div className="max-w-[42vw] ">
             <h1
               className="text-white font-lexend text-[96px] leading-[120px]"
-              style={{
-                textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-              }}
-              suppressHydrationWarning={true}
+              style={{ textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)" }}
             >
-              {isClient ? (
-                <AnimateOnChange
-                  animationIn="fadeIn"
-                  animationOut="fadeOut"
-                  durationIn="200ms"
-                  durationOut="200ms"
-                  suppressHydrationWarning={true}
-                  easingsIn="easeInQuad"
-                  easingsOut="easeInQuad"
-                >
-                  {current.title ?? ""}
-                </AnimateOnChange>
-              ) : (
-                <span>{current.title ?? ""}</span>
-              )}
+              <AnimateOnChange
+                animationIn="fadeIn"
+                animationOut="fadeOut"
+                durationIn="200ms"
+                durationOut="200ms"
+                suppressHydrationWarning={true}
+                easingsIn="easeInQuad"
+                easingsOut="easeInQuad"
+              >
+                {current.title}
+              </AnimateOnChange>
             </h1>
             <p
               className="text-white/90 text-base leading-[26px] font-montserrat"
-              style={{
-                textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-              }}
-              suppressHydrationWarning={true}
+              style={{ textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)" }}
             >
-              {isClient ? (
-                <AnimateOnChange
-                  animationIn="fadeIn"
-                  animationOut="fadeOut"
-                  durationIn="200ms"
-                  durationOut="200ms"
-                  easingsIn="easeInQuad"
-                  easingsOut="easeInQuad"
-                >
-                  {current.description}
-                </AnimateOnChange>
-              ) : (
-                <span>{current.description}</span>
-              )}
+              <AnimateOnChange
+                animationIn="fadeIn"
+                animationOut="fadeOut"
+                durationIn="200ms"
+                durationOut="200ms"
+                easingsIn="easeInQuad"
+                easingsOut="easeInQuad"
+                className="whitespace-pre-wrap"
+              >
+                {current.description}
+              </AnimateOnChange>
             </p>
           </div>
-          <div className="flex space-x-[50px] items-center ">
-            {cardList.map((e) => (
-              <Card key={e.id} item={e} current={current.id} />
-            ))}
+          <div className="flex-1 overflow-hidden">
+            <div
+              className="flex space-x-[50px] items-center transition-all duration-500"
+              style={{ transform: `translateX(-${currentIndex * 310}px)` }}
+            >
+              {cardList.map((e, i) => (
+                <Card key={e.id} item={e} index={i} />
+              ))}
+            </div>
           </div>
         </div>
       </main>
